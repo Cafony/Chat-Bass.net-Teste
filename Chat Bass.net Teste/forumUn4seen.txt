@@ -1,0 +1,80 @@
+class SimpleBassPlay
+    {
+        int soundcard=1;
+        int stream = 0;
+        string path = "";
+        double Volume;
+        public TAG_INFO tags;
+        public void InitialBass(int soundcard)
+        {
+            Bass.BASS_Init(soundcard, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
+            
+        }
+        public void Play(string Filename)
+        {
+
+            Bass.BASS_StreamFree(stream);
+            this.Pfad = Filename;
+            this.volume= volume* 0.01;
+            stream = Bass.BASS_StreamCreateFile(@path, 0L, 0L, BASSFlag.BASS_DEFAULT);
+            if (stream != 0)
+            {
+                Bass.BASS_ChannelPlay(stream, false);
+                tags = new TAG_INFO(@path);
+                BassTags.BASS_TAG_GetFromFile(stream, tags);
+            }
+        }
+        public void SetVolume(int VolumeInPercent)
+        {
+            this.volume= VolumeInPercent * 0.01;
+            Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, (float)Volume);
+        }
+        public int GetCurrentPosition()
+        {
+            return ((int)Bass.BASS_ChannelBytes2Seconds(stream, Bass.BASS_ChannelGetPosition(stream)));
+        }
+        public int GetDuration()
+        {
+            return ((int)Bass.BASS_ChannelBytes2Seconds(stream, Bass.BASS_ChannelGetLength(stream)));
+        }
+        public void SetCurentposition(int CurrentPosition)
+        {
+            Bass.BASS_ChannelSetPosition(stream, (double)CurrentPosition);
+        }
+        public void Stop()
+        {
+            Bass.BASS_ChannelStop(stream);
+            Bass.BASS_StreamFree(stream);
+            Bass.BASS_Free();
+        }
+        bool Playing;
+        public bool IsPlaying()
+        {
+            if (Bass.BASS_ChannelIsActive(stream) != BASSActive.BASS_ACTIVE_PLAYING)
+            {
+                Playing = false;
+            }
+            else
+            {
+                Playing = true;
+            }
+            return Playing;
+        }
+        public void Pause()
+        {
+            if (Bass.BASS_ChannelIsActive(stream) == BASSActive.BASS_ACTIVE_PLAYING)
+            {
+                Bass.BASS_ChannelPause(stream);
+            }
+            else if (Bass.BASS_ChannelIsActive(stream) == BASSActive.BASS_ACTIVE_PAUSED)
+            {
+                Bass.BASS_ChannelPlay(stream, false);
+            }
+
+        }
+        public int GetVolume()
+        {
+            return (int)(volume* 100);
+        }
+
+    }
